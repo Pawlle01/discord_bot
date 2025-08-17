@@ -1,5 +1,10 @@
 import discord
+import aiohttp
+import datetime as dt
 from discord.ext import commands
+
+# Vars
+download_path = "media_downloads/"
 
 # Intents 
 intents = discord.Intents.default()
@@ -28,7 +33,24 @@ async def hello(ctx):
     await ctx.send("Hello World! I am Pawle's Goy-Clanker.")
 
 @bot.command()
-async def echo(ctx, *, message):
-    await ctx.send(f"You said: {message}")
+async def download_image(ctx, *, url):
+    caller_name = ctx.author
+    async with aiohttp.ClientSession() as session:
+
+        async with session.get(url) as response:
+
+            if response.status == 200:
+                data = await response.read()
+                filename =  caller_name + dt.now().strftime(r"%Y-%m-%d_%H:%M%S") + url.split("/")[-1]
+
+                with open(download_path+filename, "wb") as f:
+                    f.write(data)
+
+                await ctx.send(f"Image downloaded successfully")
+
+            else:
+                await ctx.send(f"Image download failed. Please try again.\nStatus Code: {response.status_code}")
+
+
 
 bot.run(token)
