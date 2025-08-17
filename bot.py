@@ -34,23 +34,28 @@ async def hello(ctx):
 
 @bot.command()
 async def download_image(ctx, *, url):
-    caller_name = ctx.author
-    async with aiohttp.ClientSession() as session:
+    caller_name = str(ctx.author)
+    if caller_name == "pawle":
+        async with aiohttp.ClientSession() as session:
 
-        async with session.get(url) as response:
+            async with session.get(url) as response:
 
-            if response.status == 200:
-                data = await response.read()
-                filename =  caller_name + dt.now().strftime(r"%Y-%m-%d_%H:%M%S") + url.split("/")[-1]
+                if response.status == 200:
+                    data = await response.read()
+                    filename =  caller_name + dt.datetime.now().strftime(r"%Y-%m-%d_%H%M%S") + url.split("/")[-1]
 
-                with open(download_path+filename, "wb") as f:
-                    f.write(data)
+                    with open(download_path+filename, "wb") as f:
+                        f.write(data)
 
-                await ctx.send(f"Image downloaded successfully")
+                    await ctx.send(f"Image downloaded successfully")
 
-            else:
-                await ctx.send(f"Image download failed. Please try again.\nStatus Code: {response.status_code}")
+                else:
+                    await ctx.send(f"Image download failed. Please try again.\nStatus Code: {response.status_code}")
+    else:
+        await ctx.send(f"Sorry, you are not permitted to use this command right now. Good try.")
 
-
+@bot.command()
+async def id_test(ctx):
+    await ctx.send(f"{ctx.author}")
 
 bot.run(token)
