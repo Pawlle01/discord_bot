@@ -30,7 +30,7 @@ async def on_ready():
 
 @bot.command()
 async def hello(ctx):
-    await ctx.send("Hello World! I am Pawle's Goy-Clanker.")
+    await ctx.send("Hello World! I am Pawle's Clanker.")
 
 @bot.command()
 async def download_image(ctx, *, url):
