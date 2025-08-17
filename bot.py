@@ -16,7 +16,7 @@ bot = commands.Bot(command_prefix="Clanker!", intents=intents, case_insensitive=
 
 # Token
 token = ""
-with open("tokens", 'r') as file:
+with open("tokens.txt", 'r') as file:
     token = file.read().split("bot_token=", 1)[1]
 
 @bot.event
@@ -26,5 +26,9 @@ async def on_ready():
 @bot.command()
 async def hello(ctx):
     await ctx.send("Hello World! I am Pawle's Goy-Clanker.")
+
+@bot.command()
+async def echo(ctx, *, message):
+    await ctx.send(f"You said: {message}")
 
 bot.run(token)
