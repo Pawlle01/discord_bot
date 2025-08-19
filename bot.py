@@ -3,6 +3,8 @@ import aiohttp, asyncio
 import datetime as dt
 import os
 from discord.ext import commands
+from help_menu import send_help
+from soundboard_helpers import list_soundboard
 
 # Vars
 download_path = "media_downloads/"
@@ -115,9 +117,14 @@ async def soundboard_play(ctx, sound_id):
     voice_client.play(audio_source, after=after_playing)
     await ctx.send(f"Playing {os.path.basename(filename)}")
     
-    
 
+@bot.command()
+async def info(ctx):
+    await send_help(ctx) 
 
+@bot.command(name="soundboard_list", help="Shows all available soundboard clips")
+async def soundboard_list(ctx):
+    await list_soundboard(ctx)
         
 
 bot.run(token)
