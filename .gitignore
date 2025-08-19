@@ -1,2 +1,5 @@
 tokens.txt
 media_downloads/
+.venv/
+.vscode/
+soundboard/

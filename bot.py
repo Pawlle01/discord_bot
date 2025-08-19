@@ -1,6 +1,7 @@
 import discord
 import aiohttp, asyncio
 import datetime as dt
+import os
 from discord.ext import commands
 
 # Vars
@@ -78,7 +79,7 @@ async def soundboard(ctx, sound_id):
             pass
 
     voice_client.play(audio_source, after=after_playing)
-    await ctx.send(f"Playing {filename}")
+    await ctx.send(f"Playing {os.path.basename(filename)}")
     
     
 
