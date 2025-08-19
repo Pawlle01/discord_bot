@@ -55,9 +55,31 @@ async def download_image(ctx, *, url):
     else:
         await ctx.send(f"Sorry, you are not permitted to use this command right now. Good try.")
 
+@bot.command()
+async def soundboard_upload(ctx):
+    if not ctx.message.attachments:
+        await ctx.send("Please attach a file.")
+        return
+    
+    attachment = ctx.message.attachments[0]
+    filename = attachment.filename
+
+    if not filename.lower().endswith((".mp3", ".wav", ".ogg")):
+        await ctx.send("Only mp3, wa, or ogg files are supported")
+        return
+    
+    MAX_FILE_SIZE = 2 * 1024 * 1024
+    if attachment.size > MAX_FILE_SIZE:
+        await ctx.send("File is too large!")
+        return
+    
+    save_path = f"soundboard/{filename}"
+    await attachment.save(save_path)
+    await ctx.send(f"File saved as {filename}")
+    
 
 @bot.command()
-async def soundboard(ctx, sound_id):
+async def soundboard_play(ctx, sound_id):
     if not ctx.author.voice:
         await ctx.send("You are not currently in a voice channel.")
         return
@@ -78,7 +100,6 @@ async def soundboard(ctx, sound_id):
         await voice_client.disconnect()
         return
 
-    #filename = "soundboard/" + str(sound_id) + ".mp3"
     audio_source = discord.FFmpegPCMAudio(executable=r"C:\Users\pgall\Downloads\ffmpeg-2025-08-14-git-cdbb5f1b93-essentials_build\bin\ffmpeg.exe", source=filename)
     
     def after_playing(error):
