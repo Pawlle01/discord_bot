@@ -65,7 +65,20 @@ async def soundboard(ctx, sound_id):
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
 
-    filename = "soundboard/" + str(sound_id) + ".mp3"
+    supported_exts = [".mp3", ".wav", ".ogg"]
+    filename = None
+    for ext in supported_exts:
+        candidate = os.path.join("soundboard", f"{sound_id}{ext}")
+        if os.path.isfile(candidate):
+            filename = candidate
+            break
+
+    if not filename:
+        await ctx.send(f"Sound {sound_id} not found (tried {supported_exts})")
+        await voice_client.disconnect()
+        return
+
+    #filename = "soundboard/" + str(sound_id) + ".mp3"
     audio_source = discord.FFmpegPCMAudio(executable=r"C:\Users\pgall\Downloads\ffmpeg-2025-08-14-git-cdbb5f1b93-essentials_build\bin\ffmpeg.exe", source=filename)
     
     def after_playing(error):
