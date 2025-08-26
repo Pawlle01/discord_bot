@@ -32,5 +32,11 @@ async def send_help(ctx):
         inline=False
     )
 
+    embed.add_field(
+        name="soundboard_list",
+        value="Lists all soundboard files and durations.\nUsage: `Clanker!soundboard_list`",
+        inline=False
+    )
+
     embed.set_footer(text="Clanker Bot • Developed by Pawle")
     await ctx.send(embed=embed)

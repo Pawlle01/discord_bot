@@ -2,9 +2,12 @@ import discord
 import aiohttp, asyncio
 import datetime as dt
 import os
+import psutil
+import time
 from discord.ext import commands
+
 from help_menu import send_help
-from soundboard_helpers import list_soundboard
+from soundboard_app import list_soundboard, play_sound_helper, sb_upload_helper
 
 # Vars
 download_path = "media_downloads/"
@@ -20,7 +23,6 @@ print("Members Intent:", intents.members)
 
 # Prefix 
 bot = commands.Bot(command_prefix="Clanker!", intents=intents, case_insensitive=True)
-
 
 # Token
 token = ""
@@ -53,69 +55,18 @@ async def download_image(ctx, *, url):
                     await ctx.send(f"Image downloaded successfully")
 
                 else:
-                    await ctx.send(f"Image download failed. Please try again.\nStatus Code: {response.status_code}")
+                    await ctx.send(f"Image download failed. Please try again.\nStatus Code: {response.status}")
     else:
         await ctx.send(f"Sorry, you are not permitted to use this command right now. Good try.")
 
 @bot.command()
 async def soundboard_upload(ctx):
-    if not ctx.message.attachments:
-        await ctx.send("Please attach a file.")
-        return
-    
-    attachment = ctx.message.attachments[0]
-    filename = attachment.filename
-
-    if not filename.lower().endswith((".mp3", ".wav", ".ogg")):
-        await ctx.send("Only mp3, wa, or ogg files are supported")
-        return
-    
-    MAX_FILE_SIZE = 2 * 1024 * 1024
-    if attachment.size > MAX_FILE_SIZE:
-        await ctx.send("File is too large!")
-        return
-    
-    save_path = f"soundboard/{filename}"
-    await attachment.save(save_path)
-    await ctx.send(f"File saved as {filename}")
+    await sb_upload_helper(ctx)
     
 
 @bot.command()
 async def soundboard_play(ctx, sound_id):
-    if not ctx.author.voice:
-        await ctx.send("You are not currently in a voice channel.")
-        return
-    
-    channel = ctx.author.voice.channel
-    voice_client = await channel.connect()
-
-    supported_exts = [".mp3", ".wav", ".ogg"]
-    filename = None
-    for ext in supported_exts:
-        candidate = os.path.join("soundboard", f"{sound_id}{ext}")
-        if os.path.isfile(candidate):
-            filename = candidate
-            break
-
-    if not filename:
-        await ctx.send(f"Sound {sound_id} not found (tried {supported_exts})")
-        await voice_client.disconnect()
-        return
-
-    audio_source = discord.FFmpegPCMAudio(executable=r"C:\Users\pgall\Downloads\ffmpeg-2025-08-14-git-cdbb5f1b93-essentials_build\bin\ffmpeg.exe", source=filename)
-    
-    def after_playing(error):
-        if error:
-            print(f"Error during playback: {error}")
-        coro = voice_client.disconnect()
-        fut = asyncio.run_coroutine_threadsafe(coro, bot.loop)
-        try:
-            fut.result()
-        except:
-            pass
-
-    voice_client.play(audio_source, after=after_playing)
-    await ctx.send(f"Playing {os.path.basename(filename)}")
+    await play_sound_helper(ctx, sound_id, bot)
     
 
 @bot.command()
