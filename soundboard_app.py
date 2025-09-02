@@ -41,7 +41,7 @@ async def list_soundboard(ctx):
 
     await ctx.send(embed=embed)
 
-async def play_sound_helper(ctx, sound_id):
+async def play_sound_helper(ctx, sound_id, bot):
     # Check voice
     if not ctx.author.voice:
         await ctx.send("You must be in a voice channel to play a sound.")
