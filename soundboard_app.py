@@ -66,10 +66,10 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Set up FFmpegPCMAudio with streaming
     audio_source = FFmpegPCMAudio(
-        executable="/usr/bin/ffmpeg",  # Correct Linux path
-        source=filename,
-        pipe=True
-    )
+    executable="/usr/bin/ffmpeg",
+    source=filename  # keep as string
+)
+
 
     # Play audio
     voice_client.play(audio_source)
