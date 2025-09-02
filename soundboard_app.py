@@ -42,12 +42,13 @@ async def list_soundboard(ctx):
 
 async def play_sound_helper(ctx, sound_id, bot):
     if not ctx.author.voice:
-        await ctx.send("You are not currently in a voice channel.")
+        await ctx.send("You are not in a voice channel.")
         return
     
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
 
+    # Find the file
     supported_exts = [".mp3", ".wav", ".ogg"]
     filename = None
     for ext in supported_exts:
@@ -57,24 +58,22 @@ async def play_sound_helper(ctx, sound_id, bot):
             break
 
     if not filename:
-        await ctx.send(f"Sound {sound_id} not found (tried {supported_exts})")
+        await ctx.send(f"Sound {sound_id} not found")
         await voice_client.disconnect()
         return
 
-    audio_source = discord.FFmpegPCMAudio(executable=r"C:\Users\pgall\Downloads\ffmpeg-2025-08-14-git-cdbb5f1b93-essentials_build\bin\ffmpeg.exe", source=filename)
-    
-    def after_playing(error):
-        if error:
-            print(f"Error during playback: {error}")
-        coro = voice_client.disconnect()
-        fut = asyncio.run_coroutine_threadsafe(coro, bot.loop)
-        try:
-            fut.result()
-        except:
-            pass
+    audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=filename)
 
-    voice_client.play(audio_source, after=after_playing)
+    # Play audio
+    voice_client.play(audio_source)
     await ctx.send(f"Playing {os.path.basename(filename)}")
+
+    # Wait until playback finishes
+    while voice_client.is_playing():
+        await asyncio.sleep(1)
+    
+    await voice_client.disconnect()
+
 
 async def sb_upload_helper(ctx):
     if not ctx.message.attachments:
