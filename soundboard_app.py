@@ -40,15 +40,16 @@ async def list_soundboard(ctx):
 
     await ctx.send(embed=embed)
 
-async def play_sound_helper(ctx, sound_id, bot):
+async def play_sound_helper(ctx, sound_id):
+    # Make sure user is in a voice channel
     if not ctx.author.voice:
         await ctx.send("You are not in a voice channel.")
         return
-    
+
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
 
-    # Find the file
+    # Look for supported file extensions
     supported_exts = [".mp3", ".wav", ".ogg"]
     filename = None
     for ext in supported_exts:
@@ -58,11 +59,16 @@ async def play_sound_helper(ctx, sound_id, bot):
             break
 
     if not filename:
-        await ctx.send(f"Sound {sound_id} not found")
+        await ctx.send(f"Sound '{sound_id}' not found.")
         await voice_client.disconnect()
         return
 
-    audio_source = discord.FFmpegPCMAudio(executable="ffmpeg", source=filename)
+    # Set up FFmpegPCMAudio with streaming
+    audio_source = FFmpegPCMAudio(
+        executable="/usr/bin/ffmpeg",  # Correct Linux path
+        source=filename,
+        pipe=True
+    )
 
     # Play audio
     voice_client.play(audio_source)
@@ -70,8 +76,9 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Wait until playback finishes
     while voice_client.is_playing():
-        await asyncio.sleep(1)
-    
+        await asyncio.sleep(0.5)
+
+    # Disconnect after done
     await voice_client.disconnect()
 
 
