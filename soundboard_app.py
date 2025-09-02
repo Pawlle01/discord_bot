@@ -6,6 +6,7 @@ from pathlib import Path
 from mutagen import File as MutagenFile
 from discord.ext import commands
 from mutagen import File
+from discord import FFmpegPCMAudio
 
 async def list_soundboard(ctx):
     folder = "soundboard"
