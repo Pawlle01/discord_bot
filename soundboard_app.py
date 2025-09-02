@@ -41,16 +41,13 @@ async def list_soundboard(ctx):
 
     await ctx.send(embed=embed)
 
-async def play_sound_helper(ctx, sound_id, bot):
-    # Make sure user is in a voice channel
+async def play_sound_helper(ctx, sound_id):
+    # Check voice
     if not ctx.author.voice:
-        await ctx.send("You are not in a voice channel.")
+        await ctx.send("You must be in a voice channel to play a sound.")
         return
 
-    channel = ctx.author.voice.channel
-    voice_client = await channel.connect()
-
-    # Look for supported file extensions
+    # Look for file
     supported_exts = [".mp3", ".wav", ".ogg"]
     filename = None
     for ext in supported_exts:
@@ -61,25 +58,37 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     if not filename:
         await ctx.send(f"Sound '{sound_id}' not found.")
-        await voice_client.disconnect()
         return
 
-    # Set up FFmpegPCMAudio with streaming
-    audio_source = FFmpegPCMAudio(
-    executable="/usr/bin/ffmpeg",
-    source=filename  # keep as string
-)
+    # Preload audio metadata to ensure it’s readable
+    try:
+        audio = MutagenFile(filename)
+        if not audio or not audio.info:
+            await ctx.send("Cannot read audio metadata.")
+            return
+    except Exception:
+        await ctx.send("Error reading audio file.")
+        return
 
+    # Now connect to voice channel
+    channel = ctx.author.voice.channel
+    voice_client = await channel.connect()
+
+    # Set up FFmpeg
+    audio_source = FFmpegPCMAudio(
+        executable="/usr/bin/ffmpeg",
+        source=filename
+    )
 
     # Play audio
     voice_client.play(audio_source)
     await ctx.send(f"Playing {os.path.basename(filename)}")
 
-    # Wait until playback finishes
+    # Wait until finished
     while voice_client.is_playing():
         await asyncio.sleep(0.5)
 
-    # Disconnect after done
+    # Disconnect
     await voice_client.disconnect()
 
 
