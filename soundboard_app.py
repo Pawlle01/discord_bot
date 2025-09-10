@@ -86,12 +86,14 @@ async def convert_to_wav(input_file):
     output_file = f"{base}.wav"
     subprocess.run([
         "ffmpeg",
-        "-y",                # overwrite if exists
+        "-y",
         "-i", input_file,
-        "-ar", "48000",
-        "-ac", "2",
+        "-f", "wav",          # force WAV container
+        "-ar", "24000",       # sample rate
+        "-ac", "1",           # mono
+        "-acodec", "pcm_s16le",  # raw PCM 16-bit
         output_file
-    ])
+    ], check=True)
     return output_file
 
 async def sb_upload_helper(ctx):
