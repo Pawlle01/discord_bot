@@ -57,9 +57,6 @@ async def play_sound_helper(ctx, sound_id, bot):
         await ctx.send(f"Sound '{sound_id}' not found.")
         return
 
-    with open(filename, "rb") as f:
-        audio_bytes = io.BytesIO(f.read())
-
     # Send message
     await ctx.send(f"Playing {os.path.basename(filename)}")
 
@@ -67,14 +64,8 @@ async def play_sound_helper(ctx, sound_id, bot):
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
 
-    # Set up FFmpeg
-    audio_source = FFmpegPCMAudio(
-        audio_bytes,
-        executable="/usr/bin/ffmpeg",
-        pipe=True
-    )
-
     # Play audio
+    audio_source = FFmpegPCMAudio(filename)
     voice_client.play(audio_source)
     
     # Wait until finished
@@ -87,15 +78,15 @@ async def play_sound_helper(ctx, sound_id, bot):
 
 async def convert_to_wav(input_file):
     base, _ = os.path.splitext(input_file)
-    output_file = f"{base}.wav"
+    output_file = f"{base}.opus"
     subprocess.run([
         "ffmpeg",
-        "-y",
-        "-i", input_file,
-        "-f", "wav",          # force WAV container
-        "-ar", "24000",       # sample rate
-        "-ac", "1",           # mono
-        "-acodec", "pcm_s16le",  # raw PCM 16-bit
+        "-y",                # Overwrite if exists
+        "-i", input_file,    # Input file path
+        "-ar", "16000",      # Sample rate 16kHz
+        "-ac", "1",          # Mono (reduces CPU usage)
+        "-c:a", "libopus",   # Encode to Opus
+        "-b:a", "64k",       # Bitrate (short soundboard clips can use 64 kbps)
         output_file
     ], check=True)
     return output_file
