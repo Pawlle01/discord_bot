@@ -1,3 +1,4 @@
+import subprocess
 import os
 import io
 import discord
@@ -94,6 +95,18 @@ async def play_sound_helper(ctx, sound_id, bot):
     voice_client.stop()
     await voice_client.disconnect()
 
+async def convert_to_wav(input_file):
+    base, _ = os.path.splitext(input_file)
+    output_file = f"{base}.wav"
+    subprocess.run([
+        "ffmpeg",
+        "-y",                # overwrite if exists
+        "-i", input_file,
+        "-ar", "48000",
+        "-ac", "2",
+        output_file
+    ])
+    return output_file
 
 async def sb_upload_helper(ctx):
     if not ctx.message.attachments:
@@ -131,3 +144,5 @@ async def sb_upload_helper(ctx):
     with open(save_path, "wb") as f:
         f.write(file_bytes)
     await ctx.send(f"File saved as {filename}")
+
+    await convert_to_wav(filename)
