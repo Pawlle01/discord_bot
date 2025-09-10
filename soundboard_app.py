@@ -3,7 +3,6 @@ import os
 import io
 import discord
 import asyncio
-import pyogg
 from pathlib import Path
 from mutagen import File as MutagenFile
 from discord.ext import commands
@@ -51,7 +50,7 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Look for file
     filename = None
-    candidate = os.path.join("soundboard", f"{sound_id}.opus")
+    candidate = os.path.join("soundboard", f"{sound_id}.wav")
     if os.path.isfile(candidate):
         filename = candidate
     else:
@@ -65,13 +64,18 @@ async def play_sound_helper(ctx, sound_id, bot):
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
 
+    # Set up FFmpeg
+    audio_source = FFmpegPCMAudio(
+        executable="/usr/bin/ffmpeg",
+        source=filename
+    )
+
     # Play audio
-    opus_file = pyogg.OpusFile(filename)
-    frames = list(opus_file.buffer)
+    voice_client.play(audio_source)
     
-    for frame in frames:
-        voice_client.send_audio_packet(frame)
-        await asyncio.sleep(0.02)  # 20ms per frame
+    # Wait until finished
+    while voice_client.is_playing():
+        await asyncio.sleep(1)
 
     # Disconnect
     voice_client.stop()
@@ -79,15 +83,15 @@ async def play_sound_helper(ctx, sound_id, bot):
 
 async def convert_to_wav(input_file):
     base, _ = os.path.splitext(input_file)
-    output_file = f"{base}.opus"
+    output_file = f"{base}.wav"
     subprocess.run([
         "ffmpeg",
-        "-y",                # Overwrite if exists
-        "-i", input_file,    # Input file path
-        "-ar", "48000",      # Sample rate 16kHz
-        "-ac", "1",          # Mono (reduces CPU usage)
-        "-c:a", "libopus",   # Encode to Opus
-        "-b:a", "64k",       # Bitrate (short soundboard clips can use 64 kbps)
+        "-y",
+        "-i", input_file,
+        "-f", "wav",          # force WAV container
+        "-ar", "16000",       # sample rate
+        "-ac", "1",           # mono
+        "-acodec", "pcm_s16le",  # raw PCM 16-bit
         output_file
     ], check=True)
     return output_file
