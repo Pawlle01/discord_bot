@@ -58,7 +58,7 @@ async def play_sound_helper(ctx, sound_id, bot):
         return
 
     with open(filename, "rb") as f:
-        audio_bytes = io.BytesIO(f.read)
+        audio_bytes = io.BytesIO(f.read())
 
     # Send message
     await ctx.send(f"Playing {os.path.basename(filename)}")
