@@ -50,7 +50,7 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Look for file
     filename = None
-    candidate = os.path.join("soundboard", f"{sound_id}.wav")
+    candidate = os.path.join("soundboard", f"{sound_id}.opus")
     if os.path.isfile(candidate):
         filename = candidate
     else:
