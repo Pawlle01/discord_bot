@@ -77,5 +77,41 @@ async def info(ctx):
 async def soundboard_list(ctx):
     await list_soundboard(ctx)
         
+@bot.command()
+async def upload_gif(ctx):
+    """Download a GIF attached to the message."""
+    if not ctx.message.attachments:
+        await ctx.send("Please attach a GIF to this command.")
+        return
+
+    attachment = ctx.message.attachments[0]
+
+    if not attachment.filename.lower().endswith(".gif"):
+        await ctx.send("Only GIF files are supported.")
+        return
+
+    download_path = "/home/pgall/codebases/kraken_web/gifs/"
+    filename = (
+        str(ctx.author)
+        + "_"
+        + dt.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        + "_"
+        + attachment.filename
+    )
+    filepath = os.path.join(download_path, filename)
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(attachment.url) as response:
+                if response.status == 200:
+                    data = await response.read()
+                    with open(filepath, "wb") as f:
+                        f.write(data)
+                    await ctx.send(f"GIF downloaded successfully: `{filename}`")
+                else:
+                    await ctx.send(f"Download failed. Status code: {response.status}")
+    except Exception as e:
+        await ctx.send(f"An error occurred: {e}")
+
 
 bot.run(token)
