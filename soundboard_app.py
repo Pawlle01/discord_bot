@@ -42,7 +42,7 @@ async def list_soundboard(ctx):
     await ctx.send(embed=embed)
 
 async def play_sound_helper(ctx, sound_id, bot):
-    # Check voice
+    # Check user in a voice channel
     if not ctx.author.voice:
         await ctx.send("You must be in a voice channel to play a sound.")
         return
@@ -70,6 +70,9 @@ async def play_sound_helper(ctx, sound_id, bot):
         await ctx.send("Error reading audio file.")
         return
 
+    # Send message
+    await ctx.send(f"Playing {os.path.basename(filename)}")
+
     # Now connect to voice channel
     channel = ctx.author.voice.channel
     voice_client = await channel.connect()
@@ -82,13 +85,13 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Play audio
     voice_client.play(audio_source)
-    await ctx.send(f"Playing {os.path.basename(filename)}")
-
+    
     # Wait until finished
     while voice_client.is_playing():
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1)
 
     # Disconnect
+    voice_client.stop()
     await voice_client.disconnect()
 
 
