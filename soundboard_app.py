@@ -49,15 +49,11 @@ async def play_sound_helper(ctx, sound_id, bot):
         return
 
     # Look for file
-    supported_exts = [".mp3", ".wav", ".ogg"]
     filename = None
-    for ext in supported_exts:
-        candidate = os.path.join("soundboard", f"{sound_id}{ext}")
-        if os.path.isfile(candidate):
-            filename = candidate
-            break
-
-    if not filename:
+    candidate = os.path.join("soundboard", f"{sound_id}.wav")
+    if os.path.isfile(candidate):
+        filename = candidate
+    else:
         await ctx.send(f"Sound '{sound_id}' not found.")
         return
 
