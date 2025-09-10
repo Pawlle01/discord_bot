@@ -57,16 +57,6 @@ async def play_sound_helper(ctx, sound_id, bot):
         await ctx.send(f"Sound '{sound_id}' not found.")
         return
 
-    # Preload audio metadata to ensure it’s readable
-    try:
-        audio = MutagenFile(filename)
-        if not audio or not audio.info:
-            await ctx.send("Cannot read audio metadata.")
-            return
-    except Exception:
-        await ctx.send("Error reading audio file.")
-        return
-
     # Send message
     await ctx.send(f"Playing {os.path.basename(filename)}")
 
