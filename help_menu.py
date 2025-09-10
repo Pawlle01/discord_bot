@@ -28,7 +28,7 @@ async def send_help(ctx):
 
     embed.add_field(
         name="soundboard_play",
-        value="Play a sound from the soundboard.\nUsage: `Clanker!soundboard_play <sound_id>`",
+        value="Plays a sound from the soundboard.\nUsage: `Clanker!soundboard_play <sound_id>`",
         inline=False
     )
 
