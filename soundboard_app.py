@@ -145,4 +145,4 @@ async def sb_upload_helper(ctx):
         f.write(file_bytes)
     await ctx.send(f"File saved as {filename}")
 
-    await convert_to_wav(filename)
+    await convert_to_wav(save_path)
