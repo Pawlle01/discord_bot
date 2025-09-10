@@ -57,6 +57,9 @@ async def play_sound_helper(ctx, sound_id, bot):
         await ctx.send(f"Sound '{sound_id}' not found.")
         return
 
+    with open(filename, "rb") as f:
+        audio_bytes = io.BytesIO(f.read)
+
     # Send message
     await ctx.send(f"Playing {os.path.basename(filename)}")
 
@@ -66,8 +69,9 @@ async def play_sound_helper(ctx, sound_id, bot):
 
     # Set up FFmpeg
     audio_source = FFmpegPCMAudio(
+        audio_bytes,
         executable="/usr/bin/ffmpeg",
-        source=filename
+        pipe=True
     )
 
     # Play audio
