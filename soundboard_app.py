@@ -3,6 +3,7 @@ import os
 import io
 import discord
 import asyncio
+import pyogg
 from pathlib import Path
 from mutagen import File as MutagenFile
 from discord.ext import commands
@@ -65,12 +66,12 @@ async def play_sound_helper(ctx, sound_id, bot):
     voice_client = await channel.connect()
 
     # Play audio
-    audio_source = FFmpegPCMAudio(filename)
-    voice_client.play(audio_source)
+    opus_file = pyogg.OpusFile(filename)
+    frames = list(opus_file.buffer)
     
-    # Wait until finished
-    while voice_client.is_playing():
-        await asyncio.sleep(1)
+    for frame in frames:
+        voice_client.send_audio_packet(frame)
+        await asyncio.sleep(0.02)  # 20ms per frame
 
     # Disconnect
     voice_client.stop()
@@ -83,7 +84,7 @@ async def convert_to_wav(input_file):
         "ffmpeg",
         "-y",                # Overwrite if exists
         "-i", input_file,    # Input file path
-        "-ar", "16000",      # Sample rate 16kHz
+        "-ar", "48000",      # Sample rate 16kHz
         "-ac", "1",          # Mono (reduces CPU usage)
         "-c:a", "libopus",   # Encode to Opus
         "-b:a", "64k",       # Bitrate (short soundboard clips can use 64 kbps)
