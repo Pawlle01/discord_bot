@@ -40,5 +40,5 @@ It works, mostly. The rest is negotiable.
 ---
 
 ### Quickstart (coming soon)  
-*(Details will go here once soon tm )*  
+*(Details will go here soon tm alongside me actually making a proper way to build :) )*  
 
